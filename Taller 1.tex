@@ -1,0 +1,162 @@
+\documentclass[oneside]{article}
+% Título y autor(es):
+\title{Resumen de Taller de programación I (75.42)}
+\author{Lafroce Matías}
+
+\usepackage[spanish]{babel}
+\usepackage{amsmath,bm,times}
+\usepackage[a4paper,headheight=16pt,scale={0.7,0.8},hoffset=0.5cm]{geometry}
+\usepackage{pdfpages}
+\usepackage[utf8]{inputenc}
+\usepackage{lastpage}
+\usepackage{float}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{anysize}
+\usepackage{pdfpages}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\usepackage{fancyhdr}
+\usepackage[hang,bf]{caption}
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage{pgf,tikz}
+\usepackage{tikz-timing}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage{booktabs}
+
+\includepdfset{pagecommand=\thispagestyle{plain}}
+\usetikzlibrary{shapes,arrows,positioning,shadows,trees,automata}
+
+\pdfcompresslevel=9
+\newcommand{\imgdir}{includes}
+\graphicspath{{\imgdir/}}
+
+\everymath{\displaystyle}
+\newcommand{\vect}[1]{\overline{\textbf{#1}}}
+\newcommand{\bayes}{\mathop{\lessgtr}}
+
+\newcommand{\fil}[1]{\text{Fil}(#1)}
+\newcommand{\col}[1]{\text{Col}(#1)}
+\newcommand{\nul}[1]{\text{Nul}(#1)}
+\newcommand{\im}[1]{\text{Im}(#1)}
+\newcommand{\rg}[1]{\text{rango}\left(#1\right)}
+\newcommand{\dime}[1]{\text{Dim}(#1)}
+\newcommand{\dete}[1]{\left\vert #1 \right\vert}
+\newcommand{\tr}[1]{\text{tr}(#1)}
+\newcommand{\gen}[1]{\text{gen}\left\{#1\right\}}
+\newcommand{\produ}[1]{(#1)}
+
+\tikzstyle{parametros} = [draw=red, fill=gray!10, very thick,rectangle, rounded corners, inner sep=10pt, inner ysep=20pt]
+\tikzstyle{fancytitle} =[fill=red, text=white]
+
+\definecolor{darkgreen}{rgb}{0,0.5,0}
+
+\lstset{          % Elijo formato de bloques de código fuente
+	backgroundcolor=\color{white},
+	basicstyle=\ttfamily\footnotesize,
+	commentstyle=\color{darkgreen},
+	language=c
+}
+
+%------------------------- Inicio del documento ---------------------------
+
+\begin{document}
+% Hago que en la cabecera de página se muestre a la derecha la sección, y en el pie, en número de página a la derecha:
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection\ \ #1}}
+\lhead{}
+\chead{}
+\rhead{\rightmark}
+\lfoot{Taller de programación I (75.42)}
+\cfoot{}
+\rfoot{P\'agina \thepage\ de \pageref{LastPage}}
+% Carátula:
+\begin{titlepage}
+
+\thispagestyle{empty}
+
+\begin{center}
+\includegraphics[scale=0.3]{fiuba}\\
+\large{\textsc{Universidad de Buenos Aires}}\\
+\large{\textsc{Facultad De Ingeniería}}\\
+\small{A\~no 2015 - 1\textsuperscript{er} Cuatrimestre}
+\end{center}
+
+\begin{center}
+\Large{\underline{\textsc{Taller de programación I (75.42)}}}
+
+\vspace*{2cm}
+
+\textbf{\begin{LARGE}
+Resumen de Taller de programación I\\
+\end{LARGE}}
+\end{center}
+
+\vspace*{3cm}
+
+\begin{tabbing}
+\hspace{2cm}\=\+
+\\
+	AUTOR:\hspace{-1cm}\=\+\hspace{1cm}\=\hspace{6cm}\=\\
+		Lafroce Matías 	\>\>- \ 91378\\
+		$\langle$mlafroce@gmail.com$\rangle$\\
+		\\
+\end{tabbing}
+\end{titlepage}
+% Hago que las páginas se comiencen a contar a partir de aquí:
+\setcounter{page}{1}
+% Pongo el índice en una página aparte:
+\tableofcontents
+%\listoffigures
+%\listoftables
+\newpage
+% Inicio del TP:
+\marginsize{1cm}{1cm}{1cm}{1cm}
+%\setcounter{chapter}{1}
+
+	\section{Sockets}
+		\subsection{int socket(int domain, int type, int protocol)}
+		Crea un nuevo socket y devuelve su número de \textit{socket descriptor} (o -1 si hay un error).\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{domain}: Define si la familia de protocolos de la conexión. Algunos valores usados son: PF\_LOCAL (comunicación local), PF\_INET (IPv4), PF\_INET6 (IPv6).
+						\item \textbf{type}: Define el tipo de conexión. Algunos de los valores valores más usados son SOCK\_STREAM y SOCK\_DGRAM para protocolos TCP y UDP respectivamente.
+						\item \textbf{protocol}: Define el protocolo a utilizar, se lo puede dejar en 0 para que se elija el apropiado según el tipo de conexión.
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};						
+		\end{tikzpicture}	
+		
+		\subsection{int bind(int sockfd, const struct sockaddr *addr, socklen\_t addrlen)}
+		Asocia al socket a una dirección. Devuelve 0 en éxito o -1 en caso de error.\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{sockfd}: el número del socket descriptor al que se le quiere asociar la dirección.
+						\item \textbf{addr}: dirección a la que se quiere asociar el socket.\\
+						La estructura que se utiliza generalmente es la siguiente:\\
+						\begin{lstlisting}
+struct sockaddr_in {
+	sa_family_t sin_family; /* address family: AF_INET */
+	in_port_t sin_port;     /* puerto en formato de red (pasarle htons(port)) */
+	in_addr sin_addr;       /*IP a la que se quiere asociar */
+};
+						\end{lstlisting}
+						\item \textbf{addrlen}: Tamaño de la estructura: sizeof(struct sockaddr\_in);
+						Si el socket se utilizará como cliente, no es necesario bindearlo antes de hacer un connect.
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};						
+		\end{tikzpicture}	
+\pagebreak
+\end{document}
