@@ -29,6 +29,7 @@
 
 \includepdfset{pagecommand=\thispagestyle{plain}}
 \usetikzlibrary{shapes,arrows,positioning,shadows,trees,automata}
+\usetikzlibrary{babel}
 
 \pdfcompresslevel=9
 \newcommand{\imgdir}{includes}
@@ -55,10 +56,16 @@
 \definecolor{darkgreen}{rgb}{0,0.5,0}
 
 \lstset{          % Elijo formato de bloques de código fuente
-	backgroundcolor=\color{white},
+	backgroundcolor=\color{gray!5},
 	basicstyle=\ttfamily\footnotesize,
+	breaklines=true,
 	commentstyle=\color{darkgreen},
-	language=c
+	frame=single,
+	language=c++,
+	numbers=left,
+	tabsize=2,
+	showspaces=false,
+	showstringspaces=false,
 }
 
 %------------------------- Inicio del documento ---------------------------
@@ -101,9 +108,9 @@ Resumen de Taller de programación I\\
 \hspace{2cm}\=\+
 \\
 	AUTOR:\hspace{-1cm}\=\+\hspace{1cm}\=\hspace{6cm}\=\\
-		Lafroce Matías 	\>\>- \ 91378\\
-		$\langle$mlafroce@gmail.com$\rangle$\\
-		\\
+	Lafroce Matías 	\>\>- \ 91378\\
+	$\langle$mlafroce@gmail.com$\rangle$\\
+	\\
 \end{tabbing}
 \end{titlepage}
 % Hago que las páginas se comiencen a contar a partir de aquí:
@@ -118,8 +125,14 @@ Resumen de Taller de programación I\\
 %\setcounter{chapter}{1}
 
 	\section{Sockets}
+	
+		Un socket es un flujo de datos que se utilizar para comunicar procesos entre si. Los sockets tienen un dominio sobre el cual se comunican, como por ejemplo, internet IPv4 e IPv6, o Unix para comunicar procesos dentro del mismo sistema. Además, poseen un tipo de conexión, por ejemplo, si es punto a punto o no, si los paquetes son de longitud fija o variable, etc, y poseen un protocolo sobre el que se realiza la transmisión de datos.
+		
+		
+		A continuación se describen las primitivas más utilizadas para el manejo de sockets POSIX en C. Nótese que los sockets se manejan igual que los archivos, y que como tales, las acciones sobre ellos se realizan mediante su \emph{file descriptor}.
+	
 		\subsection{int socket(int domain, int type, int protocol)}
-		Crea un nuevo socket y devuelve su número de \textit{socket descriptor} (o -1 si hay un error).\\
+		Crea un nuevo socket y devuelve su número de \emph{socket descriptor} (o -1 si hay un error).\\
 		\begin{tikzpicture}
 			\node [parametros] (box){%
 				\begin{minipage}{0.80\textwidth}
@@ -131,17 +144,18 @@ Resumen de Taller de programación I\\
 				\end{minipage}
 				};
 			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};						
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
 		\end{tikzpicture}	
-		
+
 		\subsection{int bind(int sockfd, const struct sockaddr *addr, socklen\_t addrlen)}
 		Asocia al socket a una dirección. Devuelve 0 en éxito o -1 en caso de error.\\
 		\begin{tikzpicture}
 			\node [parametros] (box){%
 				\begin{minipage}{0.80\textwidth}
 					\begin{itemize}
-						\item \textbf{sockfd}: el número del socket descriptor al que se le quiere asociar la dirección.
-						\item \textbf{addr}: dirección a la que se quiere asociar el socket.\\
+						\item \textbf{sockfd}: Número del socket descriptor al que se le quiere asociar la dirección.
+						\item \textbf{addr}: Dirección a la que se quiere asociar el socket.
+						
 						La estructura que se utiliza generalmente es la siguiente:\\
 						\begin{lstlisting}
 struct sockaddr_in {
@@ -156,7 +170,188 @@ struct sockaddr_in {
 				\end{minipage}
 				};
 			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};						
-		\end{tikzpicture}	
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
+		\end{tikzpicture}
+
+		\subsection{int listen(int sockfd, int backlog)}
+		Marca el socket como pasivo, es decir, que escuche conexiones entrantes. El socket debe ser del tipo SOCK\_STREAM o SOCK\_SEQPACKET. Devuelve 0 en éxito o -1 en caso de error.\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{sockfd}: Número del socket descriptor a pasivar.
+						\item \textbf{backlog}: Cantidad máxima de conexiones a encolar
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
+		\end{tikzpicture}
+
+		\subsection{int accept(int sockfd, struct sockaddr *addr, socklen\_t *addrlen)}
+		Genera un socket a partir de la primera de las conexiones encoladas en el socket correspondiente a sockfd. Devuelve el número del file descriptor de la nueva conexión o -1 en caso de error.\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{sockfd}: Socket escuchador. Tiene que estar previamente pasivado con \emph{listen} (Por lo que también es prerequisito haber llamado a \emph{bind})
+						\item \textbf{addr}: Puntero a la estructura en la que se escribe la dirección del cliente que se conecta. Se le puede pasar 0 para ignorar esta información.
+						\item \textbf{addrlen}: Tamaño de la estructura sockaddr. Si addr es 0, se recomienda que addrlen sea 0 también.
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
+		\end{tikzpicture}
+
+		\subsection{int connect(int sockfd, const struct sockaddr *addr, socklen\_t addrlen)}
+		Conecta el socket a la dirección pasada por addr.  Devuelve 0 en éxito o -1 en caso de error.\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{sockfd}: Número del socket descriptor que se quiere conectar como “cliente”.
+						\item \textbf{addr}: Dirección al que se quiere conectar el socket.
+						\item \textbf{addrlen}: Tamaño de la estructura sockaddr.
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
+		\end{tikzpicture}
+
+		\subsection{int shutdown(int sockfd, int how)}
+		Desactiva toda o parte de la conexión.\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{sockfd}: Número del socket descriptor a desactivar.
+						\item \textbf{how}: Especifica si se quiere desactivar la escritura, lectura o ambas
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
+		\end{tikzpicture}
+
+		\subsection{int close(int sockfd)}
+		Cierra el socket, y libera los recursos correspondientes.\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{sockfd}: Número del socket descriptor a cerrar.
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
+		\end{tikzpicture}
+
+	\section{Protocolos TCP/UDP}
+		
+		A continuación se describen los protocolos más utilizados para comunicaciones sobre redes: \emph{TCP} y \emph{UDP}, y algunas de sus primitivas.
+		
+		El protocolo \emph{TCP} se utiliza en conexiones de streaming punto a punto, donde se utiliza un socket para cada punta de cada conexión. Esto implica que si un servidor está conectado a varios clientes, debe tener un socket distinto para cada uno de ellos. Este protocolo además tiene como característico que los paquetes siempre llegan a destino y en el orden en que fueron mandados.
+		
+		El protocolo \emph{UDP}, por otro lado, se utiliza en conexiones basadas en datagramas, donde las conexiones no son punto a puntos, sino que el servidor realiza un \emph{broadcast} de un mensaje y los clientes lo reciben como pueden. Este protocolo no asegura que todos los paquetes lleguen del servidor al cliente, ni asegura que se mantenga el orden al recibirlos. Es un protocolo más liviano que TCP y se utiliza cuando lo importante no es la fidelidad de los datos, sino la rapida transmisión de los mismos.
+		
+		Dado que el socket es un archivo con un file descriptor asociado, podemos realizar lectura y escritura como lo haríamos con cualquier otro archivo. Sin embargo, para aprovechar los protocolos ya existentes, se utilizarán las funciones \emph{recv} y \emph{send}. Cabe destacar que las funciones \emph{read} y \emph{write} del standard de Unix funcionan sobre el file descriptor del socket, pero estarían traspasando el protocolo de la conexión, ya que realizan escritura y lectura a bajo nivel. 
+
+		\subsection{ssize\_t recv(int sockfd, void *buf, size\_t len, int flags)}
+		Lee una cadena de bytes del socket y devuelve la cantidad de bytes que leyó, o -1 en caso de error.\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{sockfd}: Número del socket descriptor a leer.
+						\item \textbf{buf}: Buffer sobre el que se va a escribir lo recibido.
+						\item \textbf{len}: La cantidad de bytes que se espera leer (no necesariamente se llegan a leer todos).
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
+		\end{tikzpicture}
+
+		\subsection{ssize\_t send(int sockfd, void *buf, size\_t len, int flags)}
+		Escribe una cadena de bytes del socket y devuelve la cantidad de bytes que envió, o -1 en caso de error.\\
+		\begin{tikzpicture}
+			\node [parametros] (box){%
+				\begin{minipage}{0.80\textwidth}
+					\begin{itemize}
+						\item \textbf{sockfd}: Número del socket descriptor a escribir.
+						\item \textbf{buf}: Buffer sobre el que se va a leer el mensaje a enviar.
+						\item \textbf{len}: La cantidad de bytes que se espera escribir (no necesariamente se llegan a enviar todos).
+						\item \textbf{flags}: Es recomendable usar MSG\_NOSIGNAL para evitar que se emitan señales SIGPIPE cuando la conexión está rota.
+					\end{itemize}
+				\end{minipage}
+				};
+			\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
+			\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
+		\end{tikzpicture}
+
+\pagebreak
+
+	\section{Ejemplo}
+
+		\subsection{Cliente}
+		\begin{lstlisting}
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <cstring> //Necesario para el memset
+#include <cstdio>
+
+#define BACKLOG 20
+#define MSG_SIZE 30
+
+int main(int, char**){
+		printf("Iniciando el cliente en la direccion 127.0.0.1:8080\n");
+		int socketFd = socket(PF_INET, SOCK_STREAM, 0); //Creo el socket
+
+		char serverAddress[] = "127.0.0.1";
+
+		struct sockaddr_in address; //Armo los datos para conectarse
+		address.sin_family = AF_INET;
+		address.sin_port = htons(8080); //Seteo el puerto, en formato de red
+		address.sin_addr.s_addr = inet_addr(serverAddress);
+		memset(address.sin_zero, 0, sizeof(address.sin_zero));
+
+		int connected = connect(socketFd, (struct sockaddr *) &address,
+				sizeof(struct sockaddr_in)); //Me conecto a la direccion.
+		if (connected != 0){
+				printf("Falla al conectar\n");
+				return connected;
+		}
+
+		char message[MSG_SIZE];
+		int bytesRecv = 0;
+
+		printf ("Recibiendo el mensaje...\n");
+		//Le envio 30 bytes al cliente (un numero arbitrario
+		while (bytesRecv < MSG_SIZE && bytesRecv != -1){
+				// Agrego offsets si es que no se envia todo el mensaje
+				bytesRecv += recv(socketFd, message + bytesRecv,
+									MSG_SIZE - bytesRecv, 0); 
+				printf("Recibido %d bytes\n", bytesRecv);
+		}
+		message[29] = 0; //Cierro string
+
+		printf ("Recibo el mensaje %s\n", message);
+
+		shutdown(socketFd, 0); //Dejo de transmitir datos
+
+		close(socketFd); //Cierro file descriptor
+
+		printf("Adios, vuelvas prontos\n");
+
+		return 0;
+}
+		\end{lstlisting}
+		%\pagebreak
+		%\subsection{Servidor}
+		%\lstinputlisting{"src/ejemplo/server.cpp"}
 \pagebreak
 \end{document}
