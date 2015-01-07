@@ -47,8 +47,10 @@
 	basicstyle=\ttfamily\footnotesize,
 	breaklines=true,
 	commentstyle=\color{darkgreen},
+	extendedchars=true,
 	frame=single,
 	language=c++,
+	literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1, % Escapeo caracteres especiales
 	keywordstyle=\color{darkblue},
 	numbers=left,
 	numberstyle=\tiny\color{gray},
@@ -69,7 +71,7 @@
 \rhead{\rightmark}
 \lfoot{Taller de programación I (75.42)}
 \cfoot{}
-\rfoot{P\'agina \thepage\ de \pageref{LastPage}}
+\rfoot{Página \thepage\ de \pageref{LastPage}}
 % Carátula:
 \begin{titlepage}
 
@@ -79,7 +81,7 @@
 \includegraphics[scale=0.3]{fiuba}\\
 \large{\textsc{Universidad de Buenos Aires}}\\
 \large{\textsc{Facultad De Ingeniería}}\\
-\small{A\~no 2015 - 1\textsuperscript{er} Cuatrimestre}
+\small{Año 2015 - 1\textsuperscript{er} Cuatrimestre}
 \end{center}
 
 \begin{center}
@@ -359,63 +361,15 @@ struct sockaddr_in {
 	\subsection{Ejemplo}
 
 		\subsubsection{Cliente}
-		\begin{lstlisting}
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <cstring> //Necesario para el memset
-#include <cstdio>
+		\lstinputlisting{resources/cliente-servidor/client.cpp}
 
-#define BACKLOG 20
-#define MSG_SIZE 30
-
-int main(int, char**){
-	printf("Iniciando el cliente en la direccion 127.0.0.1:8080\n");
-	int socketFd = socket(PF_INET, SOCK_STREAM, 0); //Creo el socket
-
-	char serverAddress[] = "127.0.0.1";
-
-	struct sockaddr_in address; //Armo los datos para conectarse
-	address.sin_family = AF_INET;
-	address.sin_port = htons(8080); //Seteo el puerto, en formato de red
-	address.sin_addr.s_addr = inet_addr(serverAddress);
-	memset(address.sin_zero, 0, sizeof(address.sin_zero));
-
-	int connected = connect(socketFd, (struct sockaddr *) &address,
-		sizeof(struct sockaddr_in)); //Me conecto a la direccion.
-	if (connected != 0){
-		printf("Falla al conectar\n");
-		return connected;
-	}
-
-	char message[MSG_SIZE];
-	int bytesRecv = 0;
-
-	printf ("Recibiendo el mensaje...\n");
-	//Le envio 30 bytes al cliente (un numero arbitrario
-	while (bytesRecv < MSG_SIZE && bytesRecv != -1){
-		// Agrego offsets si es que no se envia todo el mensaje
-		bytesRecv += recv(socketFd, message + bytesRecv,
-							MSG_SIZE - bytesRecv, 0); 
-		printf("Recibido %d bytes\n", bytesRecv);
-	}
-	message[29] = 0; //Cierro string
-
-	printf ("Recibo el mensaje %s\n", message);
-
-	shutdown(socketFd, 0); //Dejo de transmitir datos
-
-	close(socketFd); //Cierro file descriptor
-
-	printf("Adios, vuelvas prontos\n");
-
-	return 0;
-}
-		\end{lstlisting}
-		%\pagebreak
-		%\subsubsection{Servidor}
-		%\lstinputlisting{"src/ejemplo/server.cpp"}
 \pagebreak
+
+		\subsubsection{Servidor}
+		\lstinputlisting{resources/cliente-servidor/server.cpp}
+
+\pagebreak
+
 	\section{Threads POSIX}
 		Una forma de trabajar con concurrencia es mediante el uso de hilos de ejecución, o también conocidos como \emph{Threads}. Un thread, también llamado "proceso de peso liviano", se diferencia de un proceso en el nivel de autonomía que poseen.
 
@@ -537,4 +491,48 @@ void Foo::increment(){
 			\textbf{Firma} int pthread\_mutex\_destroy(pthread\_mutex\_t *mutex)
 			Destruye el mutex. Si se quiere volver a utilizar, se debe llamar a pthread\_mutex\_init. Se puede destruir un mutex destrabado de forma segura, pero destruir uno que está trabado trae comportamiento indefinido.
 
+\pagebreak
+
+\section{Programación en C++}
+	C++ no solo es compatible con las bibliotecas de C, sino que ofrece el paradigma de programación orientada a objetos, y herramientas de metaprogramación como templates.
+	\subsection{Objetos}
+	La programación orientada a objetos llega a C++ de la mano de las \emph{clases}. Las clases definen como se crean los objetos, que son estructuras que poseen propiedades atributos y comportamiento (métodos).
+		\subsubsection{Encapsulamiento (accesibilidad)}
+		C++ refuerza el encapsulamiento mediante niveles de acceso a sus atributos y métodos. Los 3 niveles que existen son:
+		\begin{itemize}
+			\item \textbf{Public}: El atributo/método es visible para todos, es decir, puedo acceder al mismo tanto desde adentro como fuera de la clase.
+			\item \textbf{Protected}: El atributo/método es visible para la clase y sus derivadas. Solo puedo acceder al atributo/método desde la clase que lo posee o desde las clases que derivan de ella (utilizando la herencia correspondiente).
+			\item \textbf{Private}: El atributo/método es únicamente visible para la clase que lo declara.
+			
+			%TODO: Ejemplo en código de la visibilidad.
+			
+		\end{itemize}
+		\subsubsection{Herencia}
+		TODO: Tabla de accesibilidad según tipo de herencia %TODO
+		\subsubsection{Polimorfismo}
+		TODO: Ejemplo de polimorfismo, explicar métodos virtuales, interfaces. %TODO
+
+	\subsection{Vida de un objeto}
+	TODO: Explicar como funcionan los constructores, destructor y stack.
+
+	\subsection{Patrón RAII}
+	El acrónimo \emph{RAII} proviene del inglés \emph{Resource Acquisition Is Initialization}, y hace referencia a un diseño de código en el que los recursos utilizados por un objeto son reservados en el momento de su creación (por el constructor), y son liberados en el momento de su destrucción (por el destructor).
+
+	El uso del patrón RAII ayuda a escribir un código más sólido y conciso, debido a que se suele hacer uso de variables cuya vida depende del scope en el que fue declarado. Esto trae algunas ventajas:
+	\begin{itemize}
+		\item \textbf{Encapsulamiento}: La adquisición de recursos (memoria dinámica, archivos, etc), se define una sola vez en el constructor de la clase y la liberación de los mismos en el destructor.
+		\item \emph{\textbf{Exception-safety}}: Los recursos que se encuentran abiertos en el momento que se lanza una excepción son liberados a medida que se llaman los destructores del \emph{scope} en el que se lanzó la misma. De esta manera, si una excepción no es atrapada, se van llamando los destructores y liberando recursos a medida que se va restaurando el \emph{stack}.
+	\end{itemize}
+
+\pagebreak
+
+	\subsubsection{Ejemplo}
+		En el siguiente ejemplo se muestra como usar un constructor y destructor para mantener control de un recurso (En este caso, memoria dinámica).
+		\lstinputlisting{resources/raii/buffer.cpp}
+
+	\subsection{Templates}
+	TODO %TODO
+
+	\subsection{Biblioteca STL}
+	TODO %TODO
 \end{document}
