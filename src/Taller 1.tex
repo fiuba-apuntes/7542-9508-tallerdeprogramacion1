@@ -30,6 +30,7 @@
 \graphicspath{{\imgdir/}}
 
 \tikzstyle{parametros} = [draw=red, fill=gray!10, very thick,rectangle, rounded corners, inner sep=10pt, inner ysep=20pt]
+\tikzstyle{tabla-chica} = [draw=red, fill=gray!10, thick,rectangle, inner sep=5pt, inner ysep=10pt]
 \tikzstyle{fancytitle} =[fill=red, text=white]
 
 \definecolor{darkblue}{rgb}{0,0,0.4}
@@ -502,12 +503,28 @@ void Foo::increment(){
 			\item \textbf{Public}: El atributo/método es visible para todos, es decir, puedo acceder al mismo tanto desde adentro como fuera de la clase.
 			\item \textbf{Protected}: El atributo/método es visible para la clase y sus derivadas. Solo puedo acceder al atributo/método desde la clase que lo posee o desde las clases que derivan de ella (utilizando la herencia correspondiente).
 			\item \textbf{Private}: El atributo/método es únicamente visible para la clase que lo declara.
-			
-			%TODO: Ejemplo en código de la visibilidad.
-			
+
+		\textbf{Ejemplo}:
+		\lstinputlisting{resources/objetos/perro.h}
+
 		\end{itemize}
 		\subsubsection{Herencia}
-		TODO: Tabla de accesibilidad según tipo de herencia %TODO
+		C++ permite armar una jerarquía de clases, a través de la \emph{herencia}. Una clase que hereda de otra clase, es decir, la clase \emph{derivada}, recibe y extiende los atributos y comportamiento de la clase \emph{base}.
+		El tipo de herencia determina el nivel de acceso que tendrán los atributos y métodos heredados por la clase base.
+
+		\begin{tikzpicture}
+			\node [tabla-chica] (box){
+				\begin{tabular}{c|c|c|c}
+					\textbf{Tipo de herencia} & \textbf{Atrib. base público} & \textbf{Atrib. base protegido} & \textbf{Atrib. base privado}  \\
+					\hline
+					\textbf{Pública} & Público en clase derivada & Protegido en derivada & No posee acceso \\
+					\hline
+					\textbf{Protegida} & Protegido en clase derivada & Protegido en derivada & No posee acceso \\
+					\hline
+					\textbf{Privada} & Privado en clase derivada & Privado en derivada & No posee acceso
+				\end{tabular}
+			};
+		\end{tikzpicture}
 		\subsubsection{Polimorfismo}
 		TODO: Ejemplo de polimorfismo, explicar métodos virtuales, interfaces. %TODO
 
