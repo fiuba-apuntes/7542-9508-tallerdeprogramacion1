@@ -11,13 +11,13 @@
 \usepackage[hang, bf]{caption} % Personaliza los subtítulos de las figuras y tablas
 \usepackage{float} % Permite posicionar mejor las figuras y tablas
 \usepackage{listings} % Permite insertar código fuente
-\usepackage{pgf,tikz}
-\usepackage{tikz-timing}
+\usepackage{tikz}
 
 % Defino la ruta de los paquetes personalizados para el apunte
 \newcommand{\rutapaquetes}{./paquetes-apunte}
 
 \usepackage[mostrarlicencia]{\rutapaquetes/caratula} % Caratula personalizada (cargada desde caratula.sty)
+\usepackage{\rutapaquetes/macros} % Macros útiles para los apuntes (cargado desde macros.sty)
 \usepackage[ocultarrevisores]{\rutapaquetes/colaboradores} % Seccion de colaboradores (cargada y creada con colaboradores.sty)
 \usepackage{\rutapaquetes/historial} % Seccion de historial de cambios (cargada y creada con historial.sty)
 
@@ -29,7 +29,6 @@
 	filecolor=magenta, % color of file links
 	urlcolor=blue,     % color of external links
 }
-
 
 \newcommand{\imgdir}{../resources/images} % Ruta de las imágenes
 \newcommand{\codedir}{../resources/code} % Ruta del código de ejemplo
@@ -64,11 +63,10 @@
 
 \pdfcompresslevel=9
 
-\usetikzlibrary{shapes,arrows,positioning,shadows,trees,automata}
+% Defino los entornos de los cuadros
+\cuadro{parametros}{gray}
 
-\tikzstyle{parametros} = [draw=red, fill=gray!10, very thick,rectangle, rounded corners, inner sep=10pt, inner ysep=20pt]
 \tikzstyle{tabla-chica} = [draw=red, fill=gray!10, rectangle, rounded corners, inner sep=5pt, inner ysep=10pt]
-\tikzstyle{fancytitle} =[fill=red, text=white]
 
 \definecolor{darkblue}{rgb}{0,0,0.4}
 \definecolor{darkgreen}{rgb}{0,0.4,0}
@@ -101,10 +99,10 @@
 %\listoffigures
 %\listoftables
 
-\subfile{\rutapaquetes/sobre-el-proyecto.tex} % Inlcuye informacion sobre el proyecto FIUBA Apuntes
+\subfile{\rutapaquetes/acerca-del-proyecto.tex} % Inlcuye informacion acerca del proyecto FIUBA Apuntes
 
 \section{Archivos}
-Un archivo representa un flujo de información. En Unix, todo es representado como un archivo: ficheros regulares, directorios, procesos, dispositivos, etc.   Los archivos abiertos por el sistema son almacenados en una tabla del kernel cuyo índice se conoce como \emph{file descriptor}. 
+Un archivo representa un flujo de información. En Unix, todo es representado como un archivo: ficheros regulares, directorios, procesos, dispositivos, etc. Los archivos abiertos por el sistema son almacenados en una tabla del kernel cuyo índice se conoce como \emph{file descriptor}. 
 
 Un file descriptor es básicamente una variable del tipo \emph{int}. Existen 3 file descriptors standard para los 3 flujos de datos standard POSIX:
 stdin(\emph{Standard input}), stdout (\emph{Standard output}) y stderr (\emph{Standard error}), con los valores 0, 1 y 2 respectivamente.
@@ -115,42 +113,32 @@ Para la lectura y escritura sobre los archivos, se utilizan las siguientes primi
 \subsubsection {FILE *fopen(const char *path, const char *mode)}
 Abre un fichero del \emph{file system} con la ruta indicada por path, y devuelve un puntero a su file descriptor.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{path}: Ruta al archivo que se desea abrir.
-				\item \textbf{mode}: Modo de apertura: lectura, escritura, o agregar al final. Los modos disponibles son:
-				\begin{itemize}
-					\item \textbf{r}: Solo lectura, desde el principio del archivo.
-					\item \textbf{r+}: Lectura y escritura, desde el principio del archivo.
-					\item \textbf{w}: Solo escritura, si existe, vacía todo el archivo, sino, lo crea.
-					\item \textbf{w+}: Lectura y escritura, vacía todo el archivo, sino, lo crea.
-					\item \textbf{a}: Solo escritura, si existe, se posiciona al final del archivo, sino, lo crea.
-					\item \textbf{a+}: Lectura y escritura, desde el final del archivo, sino existe, lo crea.
-				\end{itemize}
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{path}: Ruta al archivo que se desea abrir.
+		\item \textbf{mode}: Modo de apertura: lectura, escritura, o agregar al final. Los modos disponibles son:
+		\begin{itemize}
+			\item \textbf{r}: Solo lectura, desde el principio del archivo.
+			\item \textbf{r+}: Lectura y escritura, desde el principio del archivo.
+			\item \textbf{w}: Solo escritura, si existe, vacía todo el archivo, sino, lo crea.
+			\item \textbf{w+}: Lectura y escritura, vacía todo el archivo, sino, lo crea.
+			\item \textbf{a}: Solo escritura, si existe, se posiciona al final del archivo, sino, lo crea.
+			\item \textbf{a+}: Lectura y escritura, desde el final del archivo, sino existe, lo crea.
+		\end{itemize}
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection {size\_t fread(const void *ptr, size\_t size, size\_t nmemb, FILE *stream)}
 Escribe en un buffer de datos \emph{nmemb} elementos de tamaño \emph{size}, provenientes del flujo de datos correspondiente. Devuelve la cantidad de items transferidos. La función es bloqueante.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{ptr}: Puntero al buffer sobre el que se quiere escribir los contenidos del flujo de datos.
-				\item \textbf{size}: Tamaño en bytes de los datos que se quieren leer.
-				\item \textbf{nmemb}: Cantidad de elementos que se quieren leer.
-				\item \textbf{stream}: Puntero al file descriptor del que se quieren leer los datos.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{ptr}: Puntero al buffer sobre el que se quiere escribir los contenidos del flujo de datos.
+		\item \textbf{size}: Tamaño en bytes de los datos que se quieren leer.
+		\item \textbf{nmemb}: Cantidad de elementos que se quieren leer.
+		\item \textbf{stream}: Puntero al file descriptor del que se quieren leer los datos.
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection {size\_t fwrite(const void *ptr, size\_t size, size\_t nmemb, FILE *stream)}
 Escribe desde un buffer de datos \emph{nmemb} elementos de tamaño \emph{size}, hacia el flujo de datos correspondiente.
@@ -159,18 +147,13 @@ Escribe desde un buffer de datos \emph{nmemb} elementos de tamaño \emph{size}, 
 
 \subsubsection {int fseek(FILE *stream, long offset, int whence)}
 Cambia el indicador de posición asociado al archivo.\\
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{stream}: Puntero al file descriptor del archivo.
-				\item \textbf{offset}: Distancia respecto al punto de referencia elegido.
-				\item \textbf{whence}: Punto de referencia desde el cuál desplazarse una distancia \emph{offset}. Los valores posibles son SEEK\_SET, SEEK\_CUR, y SEEK\_END para marcarlo como relativo al principio, fin, o posición actual del archivo.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{stream}: Puntero al file descriptor del archivo.
+		\item \textbf{offset}: Distancia respecto al punto de referencia elegido.
+		\item \textbf{whence}: Punto de referencia desde el cuál desplazarse una distancia \emph{offset}. Los valores posibles son SEEK\_SET, SEEK\_CUR, y SEEK\_END para marcarlo como relativo al principio, fin, o posición actual del archivo.
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection {long ftell(FILE *stream)}
 Devuelve la posición actual sobre el archivo.
@@ -185,120 +168,81 @@ A continuación se describen las primitivas más utilizadas para el manejo de so
 \subsubsection{int socket(int domain, int type, int protocol)}
 Crea un nuevo socket y devuelve su número de \emph{socket descriptor} (o -1 si hay un error).
 
-\begin{tikzpicture}
-	\node [parametros] (box){
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{domain}: Define si la familia de protocolos de la conexión. Algunos valores usados son: PF\_LOCAL (comunicación local), PF\_INET (IPv4), PF\_INET6 (IPv6).
-				\item \textbf{type}: Define el tipo de conexión. Algunos de los valores valores más usados son SOCK\_STREAM y SOCK\_DGRAM para protocolos TCP y UDP respectivamente.
-				\item \textbf{protocol}: Define el protocolo a utilizar, se lo puede dejar en 0 para que se elija el apropiado según el tipo de conexión.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{domain}: Define si la familia de protocolos de la conexión. Algunos valores usados son: PF\_LOCAL (comunicación local), PF\_INET (IPv4), PF\_INET6 (IPv6).
+		\item \textbf{type}: Define el tipo de conexión. Algunos de los valores valores más usados son SOCK\_STREAM y SOCK\_DGRAM para protocolos TCP y UDP respectivamente.
+		\item \textbf{protocol}: Define el protocolo a utilizar, se lo puede dejar en 0 para que se elija el apropiado según el tipo de conexión.
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{int bind(int sockfd, const struct sockaddr *addr, socklen\_t addrlen)}
 Asocia al socket a una dirección. Devuelve 0 en éxito o -1 en caso de error.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{sockfd}: Número del socket descriptor al que se le quiere asociar la dirección.
-				\item \textbf{addr}: Dirección a la que se quiere asociar el socket.
-				
-				La estructura que se utiliza generalmente es la siguiente:
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{sockfd}: Número del socket descriptor al que se le quiere asociar la dirección.
+		\item \textbf{addr}: Dirección a la que se quiere asociar el socket.
+		
+		La estructura que se utiliza generalmente es la siguiente:
 
-				\begin{lstlisting}
-struct sockaddr_in {
-sa_family_t sin_family; /* address family: AF_INET */
-in_port_t sin_port;     /* puerto en formato de red (pasarle htons(port)) */
-in_addr sin_addr;       /*IP a la que se quiere asociar */
-};
-				\end{lstlisting}
-				\item \textbf{addrlen}: Tamaño de la estructura: sizeof(struct sockaddr\_in);
-				Si el socket se utilizará como cliente, no es necesario bindearlo antes de hacer un connect.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+		\lstinputlisting[language=C]{\codedir/sockets/parametros-bind.c}
+		
+		\item \textbf{addrlen}: Tamaño de la estructura: sizeof(struct sockaddr\_in);
+		Si el socket se utilizará como cliente, no es necesario bindearlo antes de hacer un connect.
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{int listen(int sockfd, int backlog)}
 Marca el socket como pasivo, es decir, que escuche conexiones entrantes. El socket debe ser del tipo SOCK\_STREAM o SOCK\_SEQPACKET. Devuelve 0 en éxito o -1 en caso de error.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{sockfd}: Número del socket descriptor a pasivar.
-				\item \textbf{backlog}: Cantidad máxima de conexiones a encolar
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{sockfd}: Número del socket descriptor a pasivar.
+		\item \textbf{backlog}: Cantidad máxima de conexiones a encolar
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{int accept(int sockfd, struct sockaddr *addr, socklen\_t *addrlen)}
 Genera un socket a partir de la primera de las conexiones encoladas en el socket correspondiente a sockfd. Devuelve el número del file descriptor de la nueva conexión o -1 en caso de error.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{sockfd}: Socket escuchador. Tiene que estar previamente pasivado con \emph{listen} (Por lo que también es prerequisito haber llamado a \emph{bind})
-				\item \textbf{addr}: Puntero a la estructura en la que se escribe la dirección del cliente que se conecta. Se le puede pasar 0 para ignorar esta información.
-				\item \textbf{addrlen}: Tamaño de la estructura sockaddr. Si addr es 0, se recomienda que addrlen sea 0 también.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{sockfd}: Socket escuchador. Tiene que estar previamente pasivado con \emph{listen} (Por lo que también es prerequisito haber llamado a \emph{bind})
+		\item \textbf{addr}: Puntero a la estructura en la que se escribe la dirección del cliente que se conecta. Se le puede pasar 0 para ignorar esta información.
+		\item \textbf{addrlen}: Tamaño de la estructura sockaddr. Si addr es 0, se recomienda que addrlen sea 0 también.
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{int connect(int sockfd, const struct sockaddr *addr, socklen\_t addrlen)}
-Conecta el socket a la dirección pasada por addr.  Devuelve 0 en éxito o -1 en caso de error.
+Conecta el socket a la dirección pasada por addr. Devuelve 0 en éxito o -1 en caso de error.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{sockfd}: Número del socket descriptor que se quiere conectar como “cliente”.
-				\item \textbf{addr}: Dirección al que se quiere conectar el socket.
-				\item \textbf{addrlen}: Tamaño de la estructura sockaddr.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{sockfd}: Número del socket descriptor que se quiere conectar como “cliente”.
+		\item \textbf{addr}: Dirección al que se quiere conectar el socket.
+		\item \textbf{addrlen}: Tamaño de la estructura sockaddr.
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{int shutdown(int sockfd, int how)}
-Desactiva toda o parte de la conexión.\\
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{sockfd}: Número del socket descriptor a desactivar.
-				\item \textbf{how}: Especifica si se quiere desactivar la escritura, lectura o ambas
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+Desactiva toda o parte de la conexión.
+
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{sockfd}: Número del socket descriptor a desactivar.
+		\item \textbf{how}: Especifica si se quiere desactivar la escritura, lectura o ambas
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{int close(int sockfd)}
 Cierra el socket, y libera los recursos correspondientes.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{sockfd}: Número del socket descriptor a cerrar.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{sockfd}: Número del socket descriptor a cerrar.
+	\end{itemize}
+\end{parametros*}
 
 \subsection{Protocolos TCP/UDP}
 A continuación se describen los protocolos más utilizados para comunicaciones sobre redes: \emph{TCP} y \emph{UDP}, y algunas de sus primitivas.
@@ -312,35 +256,25 @@ Dado que el socket es un archivo con un file descriptor asociado, podemos realiz
 \subsubsection{ssize\_t recv(int sockfd, void *buf, size\_t len, int flags)}
 Lee una cadena de bytes del socket y devuelve la cantidad de bytes que leyó, o -1 en caso de error.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{sockfd}: Número del socket descriptor a leer.
-				\item \textbf{buf}: Buffer sobre el que se va a escribir lo recibido.
-				\item \textbf{len}: La cantidad de bytes que se espera leer (no necesariamente se llegan a leer todos).
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{sockfd}: Número del socket descriptor a leer.
+		\item \textbf{buf}: Buffer sobre el que se va a escribir lo recibido.
+		\item \textbf{len}: La cantidad de bytes que se espera leer (no necesariamente se llegan a leer todos).
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{ssize\_t send(int sockfd, void *buf, size\_t len, int flags)}
 Escribe una cadena de bytes del socket y devuelve la cantidad de bytes que envió, o -1 en caso de error.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{sockfd}: Número del socket descriptor a escribir.
-				\item \textbf{buf}: Buffer sobre el que se va a leer el mensaje a enviar.
-				\item \textbf{len}: La cantidad de bytes que se espera escribir (no necesariamente se llegan a enviar todos).
-				\item \textbf{flags}: Es recomendable usar MSG\_NOSIGNAL para evitar que se emitan señales SIGPIPE cuando la conexión está rota.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{sockfd}: Número del socket descriptor a escribir.
+		\item \textbf{buf}: Buffer sobre el que se va a leer el mensaje a enviar.
+		\item \textbf{len}: La cantidad de bytes que se espera escribir (no necesariamente se llegan a enviar todos).
+		\item \textbf{flags}: Es recomendable usar MSG\_NOSIGNAL para evitar que se emitan señales SIGPIPE cuando la conexión está rota.
+	\end{itemize}
+\end{parametros*}
 
 \newpage
 \subsection{Ejemplo}
@@ -378,35 +312,25 @@ La creación de threads es bastante sencilla. En esencia, se utiliza una primiti
 \textbf{Firma}: int pthread\_create(pthread\_t *thread, const pthread\_attr\_t *attr, void*(*start\_routine) (void *), void *arg)\par
 Crea un nuevo hilo, almacena el id en *thread y devuelve 0 en caso de éxito. Este nuevo hilo ejecuta una función pasada por parámetro, y una vez finalizado, debe hacerse el join para liberar sus recursos.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{thread}: estructura sobre la que se almacenaran los datos del hilo creado (por ejemplo, el id).
-				\item \textbf{attr}: atributos para la creación del hilo, como pueden ser el tamaño del stack, si se le puede hacer join, etc. Setear este atributo en NULL carga los valores default
-				\item \textbf{start\_routine}: puntero a una función que tenga la firma \emph{void* miFuncion(void* arg)}, para ser ejecutada en el nuevo hilo.
-				\item \textbf{arg}: parámetro a pasar a la función puesta en el parámetro start\_routine. 
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{thread}: estructura sobre la que se almacenaran los datos del hilo creado (por ejemplo, el id).
+		\item \textbf{attr}: atributos para la creación del hilo, como pueden ser el tamaño del stack, si se le puede hacer join, etc. Setear este atributo en NULL carga los valores default
+		\item \textbf{start\_routine}: puntero a una función que tenga la firma \emph{void* miFuncion(void* arg)}, para ser ejecutada en el nuevo hilo.
+		\item \textbf{arg}: parámetro a pasar a la función puesta en el parámetro start\_routine. 
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{pthread\_join}
 \textbf{Firma}: int pthread\_join(pthread\_t thread, void **retval)\par
 Espera a que el hilo finalice y libera sus recursos.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{thread}: El hilo a finalizar. Si el hilo ya terminó de operar, join termina automáticamente.
-				\item \textbf{retval}: Puntero al lugar donde se copia el contenido devuelto por start\_routine. Si es NULL, no se copia nada.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{thread}: El hilo a finalizar. Si el hilo ya terminó de operar, join termina automáticamente.
+		\item \textbf{retval}: Puntero al lugar donde se copia el contenido devuelto por start\_routine. Si es NULL, no se copia nada.
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{pthread\_exit}
 \textbf{Firma}: void pthread\_exit(void *retval)\par
@@ -455,17 +379,12 @@ Para evitar estos problemas, asumimos que todas las instrucciones No son atómic
 \textbf{Firma}: int pthread\_mutex\_init(pthread\_mutex\_t *mutex, const pthread\_mutexattr\_t *mutexattr)\par
 Inicializa el objeto con la dirección \emph{mutex}, y los atributos en la dirección \emph{mutexattr}.
 
-\begin{tikzpicture}
-	\node [parametros] (box){%
-		\begin{minipage}{0.80\textwidth}
-			\begin{itemize}
-				\item \textbf{mutex}: El mutex a inicializar.
-				\item \textbf{mutexattr}: Atributos del mutex, como por ejemplo, si es un mutex normal, recursivo, o posee chequeo de errores. Si se coloca NULL, se toman los parámetros default.
-			\end{itemize}
-		\end{minipage}};
-	\node[fancytitle, right=10pt] at (box.north west) {Parámetros};
-	\node[fancytitle, rounded corners] at (box.south) {$\aleph$};
-\end{tikzpicture}
+\begin{parametros*}{Parámetros}
+	\begin{itemize}
+		\item \textbf{mutex}: El mutex a inicializar.
+		\item \textbf{mutexattr}: Atributos del mutex, como por ejemplo, si es un mutex normal, recursivo, o posee chequeo de errores. Si se coloca NULL, se toman los parámetros default.
+	\end{itemize}
+\end{parametros*}
 
 \subsubsection{pthread\_mutex\_lock}
 \textbf{Firma} int pthread\_mutex\_lock(pthread\_mutex\_t *mutex)
@@ -504,7 +423,7 @@ El tipo de herencia determina el nivel de acceso que tendrán los atributos y m�
 \begin{tikzpicture}
 	\node [tabla-chica] (box){
 		\begin{tabular}{c|c|c|c}
-			\textbf{Tipo de herencia} & \textbf{Atrib. base público} & \textbf{Atrib. base protegido} & \textbf{Atrib. base privado}  \\
+			\textbf{Tipo de herencia} & \textbf{Atrib. base público} & \textbf{Atrib. base protegido} & \textbf{Atrib. base privado} \\
 			\hline
 			\textbf{Pública} & Público en clase derivada & Protegido en derivada & No posee acceso \\
 			\hline
