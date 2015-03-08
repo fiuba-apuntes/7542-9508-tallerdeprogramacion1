@@ -417,7 +417,7 @@ C++ refuerza el encapsulamiento mediante niveles de acceso a sus atributos y mé
 
 \end{itemize}
 \subsubsection{Herencia}
-C++ permite armar una jerarquía de clases, a través de la \emph{herencia}. Una clase que hereda de otra clase, es decir, la clase \emph{derivada}, recibe y extiende los atributos y comportamiento de la clase \emph{base}.
+C++ permite armar una jerarquía de clases, a través de la \emph{herencia}. Una clase que hereda de otra clase, es decir, una clase \emph{derivada}, recibe y extiende los atributos y comportamiento de la clase \emph{base}.
 El tipo de herencia determina el nivel de acceso que tendrán los atributos y métodos heredados por la clase base.
 
 \begin{tikzpicture}
@@ -435,7 +435,54 @@ El tipo de herencia determina el nivel de acceso que tendrán los atributos y m�
 \end{tikzpicture}
 
 \subsubsection{Polimorfismo}
-TODO: Ejemplo de polimorfismo, explicar métodos virtuales, interfaces. %TODO
+\emph{Polimorfismo} es la propiedad por la que dos objetos de tipo distinto respondan a un mismo mensaje de distinta forma
+
+\textbf{Métodos virtuales}:\\
+Una de las formas de utilizar polimorfismo en C++ es mediante la herencia. Una clase base posee un método público o protegido, y una clase derivada puede "sobreescribirlo", cambiando el funcionamiento del método.
+En el siguiente ejemplo, la clase base "Perro" posee 3 métodos, de los cuales uno es sobreescrito por la clase derivada Doge. De esta manera, la clase derivada conserva las otras funcionalidades, pero tiene su propia versión del método ladrar.
+\lstinputlisting{\codedir/polimorfismo/perro.h}
+
+Sin embargo, un problema que presenta este código es que si yo realizo lo siguiente:
+
+\begin{lstlisting}
+Perro *perro = new Perro;
+perro->ladrar(); // Devuelve "guau"
+Doge *doge = new Doge();
+doge->ladrar(); // Devuelve "wow, such code"
+Perro *perroDoge = new Doge();
+perroDoge->ladrar(); // Error! Devuelve "wow, such code" en vez de "guau"
+\end{lstlisting}
+
+La llamada a ladrar no funcionará como uno esperaría, y en vez de llamar al método en su versión de la clase derivada, llamará a la versión en la clase padre.
+Para forzar la llamada de la versión en la clase derivada, el método debe ser declarado como \emph{virtual}. Cuando un método se declara virtual, se crea una tabla de métodos virtuales para la clase, la \emph{vtable}, de manera que cada clase derivada vaya agregando entradas a la tabla con los métodos virtuales que redefinió.
+Así, cuando se llama a un método polimorfico en tiempo de ejecución, se accede a la tabla de métodos virtuales, se busca el método correspondiente a la instancia que lo llamó y se ejecuta.
+
+La declaración del método quedaría de la siguiente forma:
+
+\begin{lstlisting}
+class Perro{
+	[...]
+	virtual std::string ladrar() const;
+};
+\end{lstlisting}
+
+Así, al llamar al método ladrar, las salidas serán como uno lo esperaba
+
+\begin{lstlisting}
+Perro *perro = new Perro;
+perro->ladrar(); // Devuelve "guau"
+Doge *doge = new Doge();
+doge->ladrar(); // Devuelve "wow, such code"
+Perro *perroDoge = new Doge();
+perroDoge->ladrar(); // Devuelve "wow, such code"
+\end{lstlisting}
+
+\subsubsection{Clases abstractas e interfaces}:
+
+Un método \emph{virtual puro} es aquel que no tiene ninguna implementación en la clase que lo declaró. Por ejemplo, es posible querer tener una clase Figura que englobe las figuras 2d más conocidas, y es posible querer que estas clases tengan, por ejemplo, un método Area() que calcule el área de las figuras.
+El polimorfismo nos permitiría crear varios tipos de Figura, y que cada una tenga su forma de calcular su área, como por ejemplo, un rectángulo con base por altura, o un círculo con pi por radio al cuadrado. Sin embargo, la clase Figura, una Figura abstracta que no existe, no tiene una implementación del método Area. Frente a esta situación, una de las opciones que tenemos es que Area sea un método virtual puro, haciendo que Figura sea una clase \emph{abstracta}.
+
+Cuando una clase posee una clase posee uno o más métodos virtuales puros, se la llama clase abstracta. Una clase abstracta no puede instanciarse, y sus clases derivadas deben implementar los métodos virtuales puros que faltan, o también serán clases abstractas. Cuando una clase posee todos sus métodos virtuales puros, se la suele llamar \emph{interfaz}.
 
 \subsection{Vida de un objeto}
 TODO: Explicar como funcionan los constructores, destructor y stack.
@@ -457,10 +504,100 @@ En el siguiente ejemplo se muestra como usar un constructor y destructor para ma
 \lstinputlisting{\codedir/raii/buffer.cpp}
 
 \subsection{Templates}
-TODO %TODO
+Los templates son una herramienta que permite técnicas de \emph{programación genérica}, utilizando tipos de datos como parámetros. También pueden ser utilizados para \emph{metaprogramación}, una técnica que permite evaluar código en la etapa de compilación en vez de tiempo de ejecución. Esto genera código temporal que puede ser optimizado por el compilador, mejorando el performance de la aplicación.
+\subsubsection{Funciones y clases template}
+Las funciones template se declaran anteponiendo la palabra clave \textbf{template} y declarando el nombre de los tipos de datos variables. En el siguiente ejemplo se implementa la función \emph{max}, para obtener el máximo entre 2 variables de un mismo tipo, y se muestra como se utiliza.
+
+\begin{lstlisting}
+template <typename T>
+T max(T x, T y) {
+    return x > y ? x : y;
+}
+
+int a = 1, b = 2;
+float c = 5, pi = 3.14;
+
+int result = max<int>(a, b);
+float result2 = max<float>(c, pi);
+\end{lstlisting}
+
+La firma template <typename T> declara a la "variable" T. Una vez declarada, puede ser utilizado como si fuera una clase o un tipo de dato. Luego, cuando se quiere usar una "instancia" de la función, se la llama poniendo el tipo de dato entre los símbolos mayor y menor, como por ejemplo max <int>(a, b). 
+
+Es notable ver que el código temporal generado al utilizar un template solo se genera si es necesario. Es decir, en el ejemplo, solo se generará codigo para una función \emph{max} para los tipos de datos \emph{int} y \emph{float}. Por este motivo, las funciones template \textbf{no pueden ser precompiladas}, y generalmente se definen en el mismo header con el que se distribuyen.
+
+De manera similar, se pueden declarar clases template, que pueden tener tipos de datos de atributos variables, u otras funciones template. Por ejemplo
+
+\begin{lstlisting}
+template <typename T>
+class Buffer{
+public:
+	T popData();
+	void pushData(T data);
+private:
+	T bufferData[10];
+};
+
+Buffer<Perro> bufferPerros;
+\end{lstlisting}
+
+\subsubsection{Otros parámetros}
+Los templates pueden recibir otros parámetros constantes que no sean tipos de datos. Por ejemplo, puedo parametrizar el largo de la clase anterior Buffer.
+
+\begin{lstlisting}
+template <typename T, int Size>
+class Buffer{
+public:
+	T popData();
+	void pushData(T data);
+private:
+	T bufferData[Size];
+};
+
+Buffer<Perro, 20> bufferPerros;
+\end{lstlisting}
+
+Los parámetros también pueden ser punteros a función, métodos o incluso otras clases templates.
+
+Además, los parámetros pueden ser declarados con un valor por defecto, de manera que la declaración de la clase anterior puede quedar así:
+
+\begin{lstlisting}
+template <typename T, int Size = 10>
+class Buffer;
+
+Buffer<Perro> bufferChicoPerros; // Posee longitud 10
+Buffer<Perro,50> bufferGrandePerros; // Posee longitud 50
+\end{lstlisting}
+
+\subsubsection{Especialización}
+La \emph{especialización}, como ligeramente sugiere el nombre, consiste en especializar (o redefinir) una función template para un tipo de dato particular. En el siguiente ejemplo se muestra como redefinir la función \emph{max} para el tipo de dato bool, de forma que devuelva si alguno de los 2 es true.
+
+\begin{lstlisting}
+template <> 
+bool max<bool>(bool x, bool y) {
+    return x || y;
+}
+\end{lstlisting}
+
+\emph{Nota} no es necesario agregar <\textbf{bool}> a la función \emph{max}, debido a que el compilador puede deducir los argumentos del template.
 
 \subsection{Biblioteca STL}
-TODO %TODO
+C++ nos trae muchas clases y funciones utiles en su biblioteca standard. Esta biblioteca, con templates con contenedores, algoritmos de ordenamiento, etc. está programada con templates, y se la conoce como \emph{STL} o \emph{Standard Template Library}. 
+Algunos de los contenedores más usados en la STL son
+\begin{itemize}
+	\item \textbf{Vector}: Representa un array de "longitud variable".
+	\item \textbf{List}: Representa una lista enlazada.
+	\item \textbf{Set}: Representa un arbol binario (de la variante rojo-negro).
+	\item \textbf{Map}: Representa un arbol binario, con nodos que almacenan un par clave valor.
+\end{itemize}
+
+Cada uno de estos contenedores presenta un \emph{iterador}, que permite recorrer los elementos de la lista secuencialmente.
+
+Una de las ventajas de utilizar la biblioteca STL es que no es necesario volver a implementar código ya existente, evitandose también posibilidad de errores y pudiendo utilizar código ya optimizado para ciertas estructuras (por ejemplo, la clase vector tiene una versión optimizada para el tipo bool, en el que utiliza un bit para cada elemento del vector).
+Otra ventaja es que las clases de la STL es que respetan el patron RAII, lo que nos ayuda a mantener control de la memoria dinámica utilizada. Además, son a prueba de excepciones, por lo que podemos utilizarlas en un entorno donde se utilizan excepciones.
+
+\subsubsection{Ejemplo}
+
+\lstinputlisting{\codedir/stl/main.cpp}
 
 % Bibliografía utilizada en el apunte
 \newpage
@@ -470,6 +607,7 @@ TODO %TODO
 \begin{thebibliography}{X}
 	\bibitem{ThinkingCPP} \textsc{Bruce Eckel}, \textit{Thinking in C++, Volume 1}, 2nd Edition, January 13, 2000.
 	\bibitem{BeejGuide} \textsc{Brian “Beej Jorgensen” Hall}, \textit{Beej's Guide to Network Programming}, Version 3.0.15, July 3, 2012.
+	\bibitem{ApuntesOficiales} \textsc{Pablo Roca, Gonzalo Merayo} \textit{Apuntes oficiales de la cátedra}.
 \end{thebibliography}
 
 % Incluir los nombres de las personas que han colaborado en la creación del apunte
@@ -480,6 +618,7 @@ TODO %TODO
 \revision{03/01/2015}{Resumen de sockets completo.}
 \revision{04/01/2015}{Resúmenes de archivos y threads completos.}
 \revision{07/01/2015}{Patrón RAII e introducción a programación en C++.}
+\revision{08/03/2015}{Polimorfismo, templates y STL}
 \makehistorial
 
 \end{document}
